@@ -1,10 +1,8 @@
 // client/src/pages/DashboardLayout.jsx
 import { useEffect, useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
-import toast from "react-hot-toast";
 import { useAuth } from "../context/AuthContext";
 import { friendRequestsAPI } from "../api";
-import { CometChat } from "../cometchat";
 import styles from "./DashboardLayout.module.css";
 
 const NAV = [
@@ -18,28 +16,11 @@ export default function DashboardLayout() {
   const navigate = useNavigate();
   const [requestCount, setRequestCount] = useState(0);
 
-  // Poll incoming requests count
   useEffect(() => {
     fetchCount();
+    // Poll every 15 seconds for new requests
     const interval = setInterval(fetchCount, 15000);
     return () => clearInterval(interval);
-  }, []);
-
-  // Real-time listener for incoming friend requests via CometChat custom messages
-  useEffect(() => {
-    const listenerID = "fr_layout_listener";
-    CometChat.addMessageListener(
-      listenerID,
-      new CometChat.MessageListener({
-        onCustomMessageReceived: (msg) => {
-          if (msg.type === "friend_request") {
-            toast("📨 New friend request!", { icon: "🤝" });
-            fetchCount();
-          }
-        },
-      })
-    );
-    return () => CometChat.removeMessageListener(listenerID);
   }, []);
 
   async function fetchCount() {
@@ -80,22 +61,12 @@ export default function DashboardLayout() {
         </nav>
 
         <div className={styles.userSection}>
-          <img
-            src={user?.avatar}
-            alt={user?.username}
-            className={styles.avatar}
-          />
+          <img src={user?.avatar} alt={user?.username} className={styles.avatar} />
           <div className={styles.userInfo}>
             <span className={styles.username}>{user?.username}</span>
             <span className={styles.userEmail}>{user?.email}</span>
           </div>
-          <button
-            onClick={handleLogout}
-            className={styles.logoutBtn}
-            title="Sign out"
-          >
-            ↩
-          </button>
+          <button onClick={handleLogout} className={styles.logoutBtn} title="Sign out">↩</button>
         </div>
       </aside>
 

@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import toast from "react-hot-toast";
 import { friendRequestsAPI } from "../api";
-import { CometChat } from "../cometchat";
 import styles from "./FriendRequestsPage.module.css";
 
 export default function FriendRequestsPage() {
@@ -14,20 +13,9 @@ export default function FriendRequestsPage() {
 
   useEffect(() => {
     loadRequests();
-
-    // Real-time: listen for custom "friend_request" messages from CometChat
-    const listenerID = "friend_requests_page";
-    CometChat.addMessageListener(
-      listenerID,
-      new CometChat.MessageListener({
-        onCustomMessageReceived: (msg) => {
-          if (msg.type === "friend_request") {
-            loadRequests();
-          }
-        },
-      })
-    );
-    return () => CometChat.removeMessageListener(listenerID);
+    // Poll every 10 seconds for new requests
+    const interval = setInterval(loadRequests, 10000);
+    return () => clearInterval(interval);
   }, []);
 
   async function loadRequests() {
@@ -97,9 +85,7 @@ export default function FriendRequestsPage() {
               />
               <div className={styles.info}>
                 <span className={styles.username}>{req.sender_username}</span>
-                <span className={styles.time}>
-                  {formatRelative(req.created_at)}
-                </span>
+                <span className={styles.time}>{formatRelative(req.created_at)}</span>
               </div>
               <div className={styles.actions}>
                 <button
